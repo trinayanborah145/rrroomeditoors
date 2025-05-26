@@ -81,10 +81,24 @@ const Portfolio: React.FC = () => {
     },
     {
       id: 6,
-      title: 'principal Cabin Interior Design in Goalpara',
+      title: 'Principal Cabin Interior Design in Goalpara',
       category: 'commercial',
       image: 'https://images.pexels.com/photos/1082355/pexels-photo-1082355.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
       videoUrl: '/videos/KINGKOR.mp4',
+    },
+    {
+      id: 7,
+      title: 'Modern Bedroom Design in Guwahati',
+      category: 'residential',
+      image: 'https://images.pexels.com/photos/1643384/pexels-photo-1643384.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+      videoUrl: '/videos/dbre.mp4',
+    },
+    {
+      id: 8,
+      title: 'Luxury Bedroom Makeover in Guwahati',
+      category: 'residential',
+      image: 'https://images.pexels.com/photos/1643384/pexels-photo-1643384.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+      videoUrl: '/videos/notunbb.mp4',
     },
   ];
 
@@ -165,7 +179,7 @@ const Portfolio: React.FC = () => {
         
         <div 
           ref={setRefs}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto"
         >
           {filteredProjects.map((project) => (
             <div key={project.id} className="project-item opacity-0">
