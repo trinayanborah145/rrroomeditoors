@@ -8,6 +8,7 @@ import Team from './components/sections/Team';
 import Contact from './components/sections/Contact';
 import Footer from './components/Footer';
 import WhatsAppButton from './components/ui/WhatsAppButton';
+import ZapierChatBot from './components/ui/ZapierChatBot';
 import { ScrollTriggerProvider } from './context/ScrollTriggerContext';
 
 function App(): JSX.Element {
@@ -25,7 +26,10 @@ function App(): JSX.Element {
           <Contact />
         </main>
         <Footer />
-        <WhatsAppButton phoneNumber="916901598958" />
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col space-y-4">
+          <ZapierChatBot />
+          <WhatsAppButton phoneNumber="916901598958" />
+        </div>
       </div>
     </ScrollTriggerProvider>
   );
