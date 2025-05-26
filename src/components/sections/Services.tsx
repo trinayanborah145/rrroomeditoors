@@ -214,9 +214,9 @@ const Services: React.FC = () => {
   ];
 
   const stats = [
-    { value: 15, label: 'Years of Experience', delay: 0.2 },
-    { value: 250, label: 'Projects Completed', suffix: '+', delay: 0.3 },
-    { value: 48, label: 'Design Awards', delay: 0.4 },
+    { value: 4, label: 'Years of Experience', delay: 0.2 },
+    { value: 500, label: 'Projects Completed', suffix: '+', delay: 0.3 },
+    { value: 48, label: 'Industry Recognization', delay: 0.4 },
     { value: 97, label: 'Satisfied Clients', suffix: '%', delay: 0.5 },
   ];
 
