@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { useInView } from 'react-intersection-observer';
-import { Play } from 'lucide-react';
+import { Play, Pause } from 'lucide-react';
 import AnimatedText from '../ui/AnimatedText';
 
 interface Project {
@@ -158,43 +158,49 @@ const Portfolio: React.FC = () => {
     }, 300);
   };
   
-  // Handle clicks on the video to toggle play/pause
-  const toggleVideoPlayback = (e: React.MouseEvent<HTMLVideoElement | HTMLDivElement>) => {
-    e.stopPropagation();
-    const video = e.currentTarget.tagName === 'VIDEO' 
-      ? e.currentTarget as HTMLVideoElement 
-      : e.currentTarget.querySelector('video');
-      
-    if (video) {
-      if (video.paused) {
-        video.play().catch(error => console.error('Error playing video:', error));
-      } else {
-        video.pause();
-      }
-    }
-  }; 
+  // Video player state
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [showPlayButton, setShowPlayButton] = useState(true);
+  const hideTimer = useRef<ReturnType<typeof setTimeout>>();
   
-  // Hide controls after a delay
-  const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
-    const video = e.currentTarget;
-    if (video.controls) {
-      setTimeout(() => {
-        video.controls = false;
-      }, 2000);
-    }
+  // Handle video play state
+  const handlePlay = () => {
+    setIsPlaying(true);
+    setShowPlayButton(false);
+    // Hide play button after a short delay
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(() => {
+      setShowPlayButton(false);
+    }, 2000);
   };
   
-  // Show controls when mouse moves
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const video = e.currentTarget.querySelector('video');
-    if (video) {
-      video.controls = true;
-      // Hide controls again after delay
-      setTimeout(() => {
-        if (!video.paused) {
-          video.controls = false;
-        }
-      }, 2000);
+  const handlePause = () => {
+    setIsPlaying(false);
+    setShowPlayButton(true);
+  };
+  
+  // Reset states when modal closes
+  useEffect(() => {
+    return () => {
+      if (hideTimer.current) clearTimeout(hideTimer.current);
+      setIsPlaying(false);
+      setShowPlayButton(true);
+    };
+  }, [isModalOpen]);
+  
+  // Toggle play/pause when clicking the video
+  const togglePlayPause = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!videoRef.current) return;
+    
+    if (videoRef.current.paused) {
+      videoRef.current.play().catch(console.error);
+      setIsPlaying(true);
+      setShowPlayButton(false);
+    } else {
+      videoRef.current.pause();
+      setIsPlaying(false);
+      setShowPlayButton(true);
     }
   };
 
@@ -271,7 +277,7 @@ const Portfolio: React.FC = () => {
       {isModalOpen && activeVideo !== null && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center bg-black transition-opacity duration-300"
-          onMouseMove={handleMouseMove}
+          onMouseMove={() => setShowPlayButton(true)}
         >
           <div className="relative w-full h-full flex flex-col items-center justify-center">
             {/* Close button */}
@@ -295,30 +301,41 @@ const Portfolio: React.FC = () => {
                   <video
                     ref={videoRef}
                     src={projects.find(p => p.id === activeVideo)?.videoUrl}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-contain brightness-110 contrast-110"
                     autoPlay
                     playsInline
-                    controls={false}
-                    controlsList="nodownload noplaybackrate"
-                    onClick={toggleVideoPlayback}
-                    onTimeUpdate={handleTimeUpdate}
+                    loop
+                    disablePictureInPicture
+                    disableRemotePlayback
+                    onClick={togglePlayPause}
+                    onPlay={handlePlay}
+                    onPause={handlePause}
                     style={{
                       backgroundColor: '#000',
                       maxHeight: '100%',
                       maxWidth: '100%',
                       cursor: 'pointer',
+                      filter: 'brightness(1.1) contrast(1.1) saturate(1.1)',
                     }}
                   />
                   
                   {/* Custom play/pause button */}
-                  <div 
-                    className="absolute inset-0 flex items-center justify-center cursor-pointer"
-                    onClick={toggleVideoPlayback}
-                  >
-                    <div className="w-16 h-16 rounded-full bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200">
-                      <Play className="w-8 h-8 text-white" />
+                  {(showPlayButton || !isPlaying) && (
+                    <div 
+                      className="absolute inset-0 flex items-center justify-center cursor-pointer transition-opacity duration-300"
+                      onClick={togglePlayPause}
+                      onMouseEnter={() => setShowPlayButton(true)}
+                      onMouseLeave={() => isPlaying && setShowPlayButton(false)}
+                    >
+                      <div className={`w-20 h-20 rounded-full bg-black bg-opacity-60 flex items-center justify-center transition-all duration-300 ${showPlayButton ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
+                        {!isPlaying ? (
+                          <Play className="w-10 h-10 text-white ml-1" />
+                        ) : (
+                          <Pause className="w-10 h-10 text-white" />
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
