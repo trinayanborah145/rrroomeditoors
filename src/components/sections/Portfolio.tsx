@@ -16,6 +16,7 @@ const Portfolio: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [activeVideo, setActiveVideo] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const { ref: inViewRef, inView } = useInView({
     threshold: 0.1,
     triggerOnce: true,
@@ -130,18 +131,71 @@ const Portfolio: React.FC = () => {
     }
   }, [inView, filteredProjects]);
 
-  const handleVideoClick = (projectId: number) => {
+  const openVideoModal = (projectId: number) => {
     setActiveVideo(projectId);
     setIsModalOpen(true);
+    // Auto-play the video when modal opens
+    setTimeout(() => {
+      const video = videoRef.current;
+      if (video) {
+        video.play().catch(error => {
+          console.error('Error playing video:', error);
+        });
+      }
+    }, 100);
   };
   
   const closeModal = () => {
+    // Pause the video when closing modal
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
     setIsModalOpen(false);
-    // We don't reset activeVideo immediately to avoid video reload if reopened
-    // It will be set to null after the modal transition completes
+    // Reset activeVideo after transition
     setTimeout(() => {
       setActiveVideo(null);
     }, 300);
+  };
+  
+  // Handle clicks on the video to toggle play/pause
+  const toggleVideoPlayback = (e: React.MouseEvent<HTMLVideoElement | HTMLDivElement>) => {
+    e.stopPropagation();
+    const video = e.currentTarget.tagName === 'VIDEO' 
+      ? e.currentTarget as HTMLVideoElement 
+      : e.currentTarget.querySelector('video');
+      
+    if (video) {
+      if (video.paused) {
+        video.play().catch(error => console.error('Error playing video:', error));
+      } else {
+        video.pause();
+      }
+    }
+  }; 
+  
+  // Hide controls after a delay
+  const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const video = e.currentTarget;
+    if (video.controls) {
+      setTimeout(() => {
+        video.controls = false;
+      }, 2000);
+    }
+  };
+  
+  // Show controls when mouse moves
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const video = e.currentTarget.querySelector('video');
+    if (video) {
+      video.controls = true;
+      // Hide controls again after delay
+      setTimeout(() => {
+        if (!video.paused) {
+          video.controls = false;
+        }
+      }, 2000);
+    }
   };
 
   return (
@@ -187,7 +241,7 @@ const Portfolio: React.FC = () => {
                 <div className="relative aspect-[4/3]">
                   <div 
                     className="relative cursor-pointer group"
-                    onClick={() => handleVideoClick(project.id)}
+                    onClick={() => openVideoModal(project.id)}
                   >
                     <img 
                       src={project.image} 
@@ -213,15 +267,18 @@ const Portfolio: React.FC = () => {
           ))}
         </div>
       </div>
-      
-      {/* Video Modal - YouTube Shorts style */}
+        {/* Video Modal - YouTube Shorts style */}
       {isModalOpen && activeVideo !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black transition-opacity duration-300">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black transition-opacity duration-300"
+          onMouseMove={handleMouseMove}
+        >
           <div className="relative w-full h-full flex flex-col items-center justify-center">
             {/* Close button */}
             <button 
               onClick={closeModal}
-              className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30 transition-all duration-200"
+              className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-black bg-opacity-60 flex items-center justify-center hover:bg-opacity-80 transition-all duration-200"
+              aria-label="Close video"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -230,22 +287,38 @@ const Portfolio: React.FC = () => {
             
             {/* Video container - YouTube Shorts style */}
             <div className="w-full h-full md:w-auto md:h-auto md:max-h-[90vh] flex items-center justify-center">
-              <div className="relative md:w-[400px] h-full md:h-auto md:max-h-[90vh] bg-black overflow-hidden">
-                <div className="relative w-full h-full flex items-center justify-center" style={{ paddingBottom: '60px' }}>
-                  {/* Use a standard HTML5 video with forced controls */}
+              <div className="relative w-full h-full bg-black flex items-center justify-center">
+                <div 
+                  className="relative w-full h-full flex items-center justify-center"
+                  style={{ maxWidth: '400px', maxHeight: '90vh' }}
+                >
                   <video
+                    ref={videoRef}
                     src={projects.find(p => p.id === activeVideo)?.videoUrl}
-                    className="w-full h-full object-contain custom-video-player"
+                    className="w-full h-full object-contain"
                     autoPlay
                     playsInline
-                    controls
-                    controlsList="nodownload"
+                    controls={false}
+                    controlsList="nodownload noplaybackrate"
+                    onClick={toggleVideoPlayback}
+                    onTimeUpdate={handleTimeUpdate}
                     style={{
                       backgroundColor: '#000',
                       maxHeight: '100%',
                       maxWidth: '100%',
+                      cursor: 'pointer',
                     }}
                   />
+                  
+                  {/* Custom play/pause button */}
+                  <div 
+                    className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                    onClick={toggleVideoPlayback}
+                  >
+                    <div className="w-16 h-16 rounded-full bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200">
+                      <Play className="w-8 h-8 text-white" />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
