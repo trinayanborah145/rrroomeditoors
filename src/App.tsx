@@ -26,9 +26,9 @@ function App(): JSX.Element {
           <Contact />
         </main>
         <Footer />
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col space-y-4">
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end space-y-4">
           <ZapierChatBot />
-          <WhatsAppButton phoneNumber="916901598958" />
+          <WhatsAppButton phoneNumber="916901598958" className="mt-6" />
         </div>
       </div>
     </ScrollTriggerProvider>

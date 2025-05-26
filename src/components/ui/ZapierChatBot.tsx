@@ -31,10 +31,10 @@ const ZapierChatBot: React.FC = () => {
   }, []);
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col space-y-4">
-      <div className="relative">
+    <>
+      <div className="relative mb-4">
         <button
-          className="w-14 h-14 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg hover:bg-blue-700 transition-colors duration-300 focus:outline-none"
+          className="w-14 h-14 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg hover:bg-blue-700 transition-all duration-300 focus:outline-none transform hover:scale-105"
           aria-label="Chat with us"
           onClick={() => {
             const chatbot = document.querySelector('zapier-interfaces-chatbot-embed');
@@ -50,7 +50,7 @@ const ZapierChatBot: React.FC = () => {
         is-popup="true" 
         chatbot-id="cmb504efg0008r4j1h88zkir0"
       />
-    </div>
+    </>
   );
 };
 
